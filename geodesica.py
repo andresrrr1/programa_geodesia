@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+
 
 def calcular_altura_instrumental(data):
     cotas = []
@@ -36,45 +37,16 @@ def calcular_altura_instrumental(data):
 
     return data
 
-
 def mostrar_perfil(data):
-    # Crear figura de Plotly
-    fig = go.Figure()
-
-    # Agregar trazado de línea
-    fig.add_trace(go.Scatter(
-        x=data['Distancia Acum'],
-        y=data['Cota'],
-        mode='lines+markers',
-        marker=dict(color='blue', size=8),
-        line=dict(color='blue', width=2),
-        name="Perfil de Cotas"
-    ))
-
-    # Agregar etiquetas de puntos
+    fig, ax = plt.subplots()
+    ax.plot(data['Distancia Acum'], data['Cota'], marker='o', linestyle='-', color='blue')
     for i, row in data.iterrows():
-        fig.add_annotation(
-            x=row['Distancia Acum'],
-            y=row['Cota'],
-            text=row['Punto Visado'],
-            showarrow=False,
-            font=dict(size=10),
-            align="right",
-            opacity=0.8
-        )
-
-    # Configurar layout
-    fig.update_layout(
-        title="Perfil de Cotas - Altura Instrumental",
-        xaxis_title="Distancia acumulada (m)",
-        yaxis_title="Cota (m)",
-        showlegend=True,
-        template="plotly_white",
-        margin=dict(l=40, r=40, t=40, b=40)
-    )
-
-    # Mostrar gráfico en Streamlit
-    st.plotly_chart(fig, use_container_width=True)
+        ax.text(row['Distancia Acum'], row['Cota'], row['Punto Visado'], fontsize=8, ha='right')
+    ax.set_xlabel("Distancia acumulada (m)")
+    ax.set_ylabel("Cota (m)")
+    ax.set_title("Perfil de Cotas - Altura Instrumental")
+    ax.grid(True)
+    st.pyplot(fig)
 
 def altura_instrumental_streamlit():
     st.title("Nivelación Geodésica")
