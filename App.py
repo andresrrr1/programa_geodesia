@@ -8,6 +8,7 @@ from Inverso import inversas_interface
 from no_reciproca import no_reciproca_interface
 from biseccion_triseccion import biseccion_interface, triseccion_interface
 from reciproca import reciproca_interface
+from geodesica import altura_instrumental_streamlit
 from lon_arco import calcular_longitud_arco_interface
 from area_cuadrilatero import area_cuadrilatero_interface  # Nuevo módulo
 
