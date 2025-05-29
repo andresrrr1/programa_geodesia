@@ -145,8 +145,7 @@ def latitudes_interface():
             st.error("Debe ingresar un valor decimal válido.")
             return
 
-    if st.button("Calcular") and valor is not None:
+    if st.button("🔍 Calcular", type='primary') and valor is not None:
         tipo_map = {'Geodésica (φ)': 'phi', 'Paramétrica (θ)': 'theta', 'Geocéntrica (ω)': 'omega'}
         resultado = calcular_latitudes(valor, tipo_map[tipo], a, b, e2)
-        st.success("Resultado:")
         st.code(resultado)

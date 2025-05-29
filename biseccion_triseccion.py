@@ -42,7 +42,7 @@ def biseccion_interface():
     with d3:
         bs = st.text_input("Segundos", key="bs")
     
-    if st.button("🔍 Calcular P"):
+    if st.button("🔍 Calcular P", type="primary"):
         # — Validación y conversión —
         campos = {
             "NA": NA_str, "EA": EA_str,
@@ -85,8 +85,7 @@ def biseccion_interface():
         st.write(f"Nᴾ = **{NP:.8f}** m")
         st.write(f"Eᴾ = **{EP:.8f}** m")
 
-    if st.button("🔙 Volver"):
-        st.experimental_rerun()
+    
 
 
 
@@ -122,7 +121,7 @@ def triseccion_interface():
     with c2: m1 = st.text_input("Minutos", key="p1m")
     with c3: s1 = st.text_input("Segundos", key="p1s")
 
-    if not st.button("🔍 Calcular P"):
+    if not st.button("🔍 Calcular P", type="primary"):
         return
 
     # Validación de entradas
@@ -206,11 +205,10 @@ def triseccion_interface():
         EP = (K1*EA + K2*EB + K3*EC)/Ksum
 
     # Salida común
-    st.markdown("### 📍 Coordenadas de P")
+    st.markdown("Coordenadas de P")
     st.write(f"Nᴾ = **{NP:.6f}** m     Eᴾ = **{EP:.6f}** m")
 
-    if st.button("🔙 Volver"):
-        st.experimental_rerun()
+   
 
 
 

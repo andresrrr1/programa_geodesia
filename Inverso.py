@@ -66,7 +66,7 @@ def inversas_interface():
     z_input = col3.text_input("Coordenada Z (m):")
     metodo = st.radio("Método de cálculo:", ["Iterativo", "Solución Exacta"])
 
-    if st.button("Calcular"):
+    if st.button("🔍 Calcular", type="primary"):
         try:
             X = float(x_input)
             Y = float(y_input)

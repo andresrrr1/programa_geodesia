@@ -90,7 +90,7 @@ def directas_interface():
         return
 
     # BOTÓN CALCULAR
-    if st.button("Calcular"):
+    if st.button("🔍 Calcular", type="primary"):
         phi_rad = math.radians(phi)
         lon_rad = math.radians(lon)
         N = a / math.sqrt(1 - e2 * math.sin(phi_rad)**2)
@@ -124,6 +124,6 @@ def obtener_parametros_datum(nombre):
     elif nombre == 'GRS 80':
         return 6378137, 1 / 298.257222101
     elif nombre == 'WGS84':
-        return 6378137, 1 / 298.257223563
+        return 6378137, 1 / 298.2572223563
     else:
-        return 6378137, 1 / 298.257223563
+        return 6378137, 1 / 298.2572223563

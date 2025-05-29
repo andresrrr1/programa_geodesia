@@ -1,12 +1,20 @@
 import streamlit as st
+
+# IMPORTANTE: st.set_page_config() debe ser la primera llamada de Streamlit
+st.set_page_config(page_title="Transformaciones Geodésicas", layout="centered")
+
+# Ahora importamos los módulos
 from Latitudes import latitudes_interface
 from Directo import directas_interface
 from Inverso import inversas_interface
-from nivelacion import nivelacion_interface
+from no_reciproca import no_reciproca_interface
 from biseccion_triseccion import biseccion_interface, triseccion_interface
+from reciproca import reciproca_interface
+from geodesica import altura_instrumental_streamlit
+from lon_arco import calcular_longitud_arco_interface
+from area_cuadrilatero import area_cuadrilatero_interface  # Nuevo módulo
 
-st.set_page_config(page_title="Transformaciones Geodésicas", layout="centered")
-st.title("Transformaciones Geodésicas")
+st.title("Programas Geodésia Geometrica")
 st.markdown("---")
 
 # Menú principal unificado
@@ -18,7 +26,11 @@ opcion = st.sidebar.radio(
         "Coordenadas Geocéntricas Directas",
         "Coordenadas Geocéntricas Inversas",
         "Nivelación Geodésica",
-        "Métodos Numéricos"
+        "Métodos Numéricos",
+        "Nivelación No Recíproca",
+        "Nivelación Recíproca",
+        "Arco de meridiano y paralelo",
+        "Área de Cuadrilátero Geodésico"  # Nueva opción
     ]
 )
 
@@ -35,8 +47,11 @@ elif opcion == "Coordenadas Geocéntricas Directas":
 elif opcion == "Coordenadas Geocéntricas Inversas":
     inversas_interface()
 
-elif opcion == "Nivelación Geodésica":
-    nivelacion_interface()
+elif opcion == "Nivelación No Recíproca":
+    no_reciproca_interface()
+
+elif opcion == "Nivelación Recíproca":
+    reciproca_interface()
 
 elif opcion == "Métodos Numéricos":
     metodo = st.sidebar.radio("Elige un método:", ["Bisección", "Trisección"])
@@ -44,4 +59,12 @@ elif opcion == "Métodos Numéricos":
         biseccion_interface()
     else:
         triseccion_interface()
-    
+
+elif opcion == "Nivelación Geodésica":
+    altura_instrumental_streamlit()
+
+elif opcion == "Arco de meridiano y paralelo":
+    calcular_longitud_arco_interface()
+
+elif opcion == "Área de Cuadrilátero Geodésico":  # Nueva funcionalidad
+    area_cuadrilatero_interface()
