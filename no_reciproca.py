@@ -47,7 +47,7 @@ def calcular_nivelacion(Z1, S, H1, i, a, finv, latitud, azimut, metodo_k="fijo")
 
 # Interfaz Streamlit
 def no_reciproca_interface():
-    st.title("Nivelación Trigonométrica No Recíproca")
+    st.header("Nivelación Trigonométrica No Recíproca")
 
     datum = st.selectbox("Selecciona el Datum", ["WGS84", "GRS80", "Internacional"])
     if datum == "WGS84":
