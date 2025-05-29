@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import math
-import matplotlib.pyplot as plt
 import folium
 
 def graficar_cuadrilatero_en_mapa(phi1_deg, phi2_deg, lambda1_deg, lambda2_deg):
