@@ -30,7 +30,7 @@ def correccion_refraccion(i, o, S):
         return None
 
 def reciproca_interface():
-    st.title("Nivelación Trigonométrica Recíproca")
+    st.header("Nivelación Trigonométrica Recíproca")
 
     datum = st.selectbox("Selecciona el Datum", ["WGS84", "GRS80", "Internacional"])
     if datum == "WGS84":
