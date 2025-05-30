@@ -2,118 +2,234 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-def calcular_altura_instrumental(data):
+# Función para calcular sube, baja y cota
+def calcular_por_sube_baja(data):
     cotas = []
-    cotas_hi = []
     dist_acum = []
-
-    ultima_hi = None
     dist_total = 0
+    ultima_cota_util = None
+    ultima_vmas_util = None
 
     for i, fila in data.iterrows():
-        estacion = fila['Estación']
-        punto_visado = fila['Punto Visado']
-        vmas = fila['V+']
-        vmenos = fila['V-']
-        distancia = fila['Distancia']
+        punto = fila['Punto Visado']
+        es_intermedia = "(Intermedia)" in str(punto)
+        sube = fila['Sube']
+        baja = fila['Baja']
 
         if i == 0:
-            hi = float(fila['Cota Inicial'])
+            cota = fila['Cota Inicial']
+            ultima_cota_util = cota
+            ultima_vmas_util = fila['V+']
+        elif es_intermedia:
+            cota = ultima_cota_util + ultima_vmas_util - fila['V-']
         else:
-            hi = cotas[-1] + vmas - vmenos
+            cota = ultima_cota_util + ultima_vmas_util - fila['V-']
+            ultima_cota_util = cota
+            ultima_vmas_util = fila['V+']
 
-        cota = hi - vmenos
-        ultima_hi = hi
-        dist_total += distancia
-
-        cotas_hi.append(hi)
-        cotas.append(cota)
+        dist_total += fila['Distancia']
         dist_acum.append(dist_total)
+        cotas.append(cota)
 
-    data['Cota HI'] = cotas_hi
-    data['Cota'] = cotas
+    data['Cota por S/B'] = cotas
     data['Distancia Acum'] = dist_acum
-
     return data
 
+# Nueva función para calcular por HI
+def calcular_por_hi(data):
+    hi_list = []
+    cotas_hi = []
+    hi_actual = None
+    cota_util = None
+    ultima_vmas_util = None
 
+    for i in range(len(data)):
+        punto = data.loc[i, 'Punto Visado']
+        es_intermedia = "(Intermedia)" in str(punto)
+
+        if i == 0:
+            cota = data.loc[i, 'Cota Inicial']
+            hi = cota + data.loc[i, 'V+']
+            cota_util = cota
+            ultima_vmas_util = data.loc[i, 'V+']
+        elif es_intermedia:
+            hi = hi_actual  # mantener HI
+            cota = hi - data.loc[i, 'V-']
+        else:
+            cota = cota_util + ultima_vmas_util - data.loc[i, 'V-']
+            hi = cota + data.loc[i, 'V+']
+            cota_util = cota
+            ultima_vmas_util = data.loc[i, 'V+']
+
+        hi_actual = hi
+        hi_list.append(0.0 if es_intermedia else hi)
+        cotas_hi.append(cota)
+
+    hi_list[-1] = 0.0
+    data['HI'] = hi_list
+    data['Cota por HI'] = cotas_hi
+    return data
+
+# Función para mostrar el perfil de cotas usando Plotly
 def mostrar_perfil(data):
-    # Crear figura de Plotly
     fig = go.Figure()
-
-    # Agregar trazado de línea
     fig.add_trace(go.Scatter(
         x=data['Distancia Acum'],
-        y=data['Cota'],
+        y=data['Cota por S/B'],
+        mode='lines+markers',
+        marker=dict(color='green', size=8),
+        line=dict(color='green', width=2),
+        name="Cota S/B"
+    ))
+    fig.add_trace(go.Scatter(
+        x=data['Distancia Acum'],
+        y=data['Cota por HI'],
         mode='lines+markers',
         marker=dict(color='blue', size=8),
         line=dict(color='blue', width=2),
-        name="Perfil de Cotas"
+        name="Cota HI"
     ))
-
-    # Agregar etiquetas de puntos
     for i, row in data.iterrows():
         fig.add_annotation(
             x=row['Distancia Acum'],
-            y=row['Cota'],
+            y=row['Cota por HI'],
             text=row['Punto Visado'],
             showarrow=False,
             font=dict(size=10),
             align="right",
             opacity=0.8
         )
-
-    # Configurar layout
     fig.update_layout(
-        title="Perfil de Cotas - Altura Instrumental",
+        title="Perfil de Cotas - Comparativo S/B y HI",
         xaxis_title="Distancia acumulada (m)",
         yaxis_title="Cota (m)",
         showlegend=True,
         template="plotly_white",
         margin=dict(l=40, r=40, t=40, b=40)
     )
-
-    # Mostrar gráfico en Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
-def altura_instrumental():
-    st.title("Nivelación Geodésica")
+# Interfaz principal de Streamlit
+def nivelacion_geodesica_streamlit():
+    st.title("Nivelación Geodésica con Múltiples Puntos Visados")
     st.markdown("### Ingreso de Datos por Estación")
 
     with st.form("form_datos"):
-        num_puntos = st.number_input("Número de estaciones (puntos visados)", min_value=1, step=1, format="%d")
+        num_estaciones = st.number_input("Número de estaciones", min_value=1, step=1, format="%d")
         data = []
 
-        for i in range(num_puntos):
+        for i in range(num_estaciones):
             st.markdown(f"#### Estación {i+1}")
-            cols = st.columns(6)
-            estacion = cols[0].text_input("Estación", key=f"est_{i}")
-            punto_visado = cols[1].text_input("Punto Visado", key=f"pv_{i}")
-            vmas = cols[2].number_input("V+", step=0.01, key=f"vmas_{i}")
-            vmenos = cols[3].number_input("V-", step=0.01, key=f"vmenos_{i}")
-            distancia = cols[4].number_input("Distancia (m)", step=0.1, key=f"dist_{i}")
-            cota_ini = cols[5].number_input("Cota Inicial", step=0.01, key=f"cota_{i}") if i == 0 else None
+            cols = st.columns([1, 1])
+            with cols[0]:
+                estacion = st.text_input("Estación", key=f"est_{i}")
+            with cols[1]:
+                num_visados = st.number_input("Número de puntos visados", min_value=1, max_value=5, step=1, key=f"num_visados_{i}")
 
-            data.append({
-                "Estación": estacion,
-                "Punto Visado": punto_visado,
-                "V+": vmas,
-                "V-": vmenos,
-                "Distancia": distancia,
-                "Cota Inicial": cota_ini
-            })
+            st.markdown("##### Puntos Visados")
+            for j in range(num_visados):
+                st.write(f"**Punto Visado {j+1}**")
+                visado_cols = st.columns([6, 6, 6, 6, 6, 1, 1])
+                punto_visado = visado_cols[0].text_input("Nombre", key=f"pv_{i}_{j}")
+                vmas = visado_cols[1].text_input("V+", key=f"vmas_{i}_{j}")
+                vmenos = visado_cols[2].text_input("V-", key=f"vmenos_{i}_{j}")
+                distancia = visado_cols[3].text_input("Distancia (m)", key=f"dist_{i}_{j}")
+                if i == 0 and j == 0:
+                    cota_ini = visado_cols[4].text_input("Cota Inicial", key=f"cota_{i}_{j}")
+                else:
+                    cota_ini = None
+                
+                intermedia = st.checkbox("¿Vista Intermedia?", key=f"intermedia_{i}_{j}")
 
+                if intermedia:
+                    data.append({
+                        "Estación": estacion,
+                        "Punto Visado": punto_visado + " (Intermedia)",
+                        "V+": vmas,
+                        "V-": vmenos,
+                        "Distancia": distancia,
+                        "Cota Inicial": None
+                    })
+                    continue
+                data.append({
+                    "Estación": estacion,
+                    "Punto Visado": punto_visado,
+                    "V+": vmas,
+                    "V-": vmenos,
+                    "Distancia": distancia,
+                    "Cota Inicial": cota_ini
+                })
         submitted = st.form_submit_button("Calcular")
 
     if submitted:
         df = pd.DataFrame(data)
-        df_calculado = calcular_altura_instrumental(df)
-        st.subheader("📋 Cartera de Cálculos")
-        st.dataframe(df_calculado)
+        columnas_float = ["V+", "V-", "Distancia", "Cota Inicial"]
+        for col in columnas_float:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+        if df['Cota Inicial'].astype(bool).sum() > 1:
+            st.error("Solo se permite una cota inicial en el primer punto de la primera estación.")
+            return
 
-        st.subheader("📈 Perfil de Cotas")
-        mostrar_perfil(df_calculado)
+        # Calcular sube/baja según V+ anterior y V- actual
+        subes = []
+        bajas = []
+        for i in range(len(df)):
+            punto = df.loc[i, 'Punto Visado']
+            es_intermedia = "(Intermedia)" in str(punto)
+            if i == 0:
+                subes.append(df.loc[i, 'V+'])
+                bajas.append(0.0)
+                ultima_vmas_util = df.loc[i, 'V+']
+            elif es_intermedia:
+                diferencia = ultima_vmas_util - df.loc[i, 'V-']
+                if diferencia > 0:
+                    subes.append(diferencia)
+                    bajas.append(0.0)
+                elif diferencia < 0:
+                    subes.append(0.0)
+                    bajas.append(abs(diferencia))
+                else:
+                    subes.append(0.0)
+                    bajas.append(0.0)
+            else:
+                diferencia = ultima_vmas_util - df.loc[i, 'V-']
+                if diferencia > 0:
+                    subes.append(diferencia)
+                    bajas.append(0.0)
+                elif diferencia < 0:
+                    subes.append(0.0)
+                    bajas.append(abs(diferencia))
+                else:
+                    subes.append(0.0)
+                    bajas.append(0.0)
+                ultima_vmas_util = df.loc[i, 'V+']
 
-# Ejecutar el módulo
+        df['Sube'] = subes
+        df['Baja'] = bajas
+
+        df = calcular_por_sube_baja(df)
+        df = calcular_por_hi(df)
+
+        columnas_ordenadas = [
+        "Estación", "Punto Visado", "V+", "V-", "HI", "Cota por HI",
+        "Sube", "Baja", "Cota por S/B", "Distancia", "Distancia Acum"
+        ]
+        st.dataframe(df[columnas_ordenadas].style.format({
+        "V+": "{:.2f}",
+        "V-": "{:.2f}",
+        "HI": "{:.2f}",
+        "Cota por HI": "{:.2f}",
+        "Sube": "{:.2f}",
+        "Baja": "{:.2f}",
+        "Cota por S/B": "{:.2f}",
+        "Distancia": "{:.2f}",
+        "Distancia Acum": "{:.1f}"
+       }))
+
+        st.subheader("📈 Perfil de Cotas Comparativo")
+        mostrar_perfil(df)
+
+# Ejecutar la interfaz
 if __name__ == "__main__":
-    altura_instrumental()
+    nivelacion_geodesica_streamlit()
+
