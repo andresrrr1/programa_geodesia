@@ -149,3 +149,4 @@ def latitudes_interface():
         tipo_map = {'Geodésica (φ)': 'phi', 'Paramétrica (θ)': 'theta', 'Geocéntrica (ω)': 'omega'}
         resultado = calcular_latitudes(valor, tipo_map[tipo], a, b, e2)
         st.code(resultado)
+
