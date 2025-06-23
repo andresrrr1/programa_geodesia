@@ -107,4 +107,3 @@ def inversas_interface():
 
         except Exception as e:
             st.error(f"Entrada inválida o incompleta: {e}")
-
