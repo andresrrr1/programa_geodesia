@@ -142,7 +142,7 @@ if opcion == "🏠 Inicio":
         <div class='card'>
             <div class='feature-icon'>📊</div>
             <h3 class='header'>Visualización</h3>
-            <p>Resultados gráficos e informes detallados</p>
+            <p>Resultados gráficos</p>
         </div>
         """, unsafe_allow_html=True)
     
