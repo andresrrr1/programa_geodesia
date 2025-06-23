@@ -17,7 +17,7 @@ def directas_interface():
     st.header("Coordenadas Geocéntricas Directas (φ, λ, h → X, Y, Z )")
     st.markdown("---")
 
-    # DATUM
+    
     datum = st.selectbox("Sistema de referencia (Datum):", ['Internacional', 'GRS 80', 'WGS84', 'Manual'])
 
     if datum == 'Manual':
@@ -43,7 +43,7 @@ def directas_interface():
     b = a * (1 - f)
     e2 = 2 * f - f**2
 
-    # ENTRADA DE φ y λ
+    
     formato = st.radio("Formato de entrada:", ['GMS', 'Decimal'])
 
     col1, col2 = st.columns(2)
@@ -81,7 +81,7 @@ def directas_interface():
             st.error("Valores GMS inválidos.")
             return
 
-    # ALTURA
+   
     h_input = st.text_input("Altura elipsoidal h (m):")
     try:
         h = float(h_input)
@@ -89,7 +89,7 @@ def directas_interface():
         st.error("Ingrese una altura válida.")
         return
 
-    # BOTÓN CALCULAR
+    
     if st.button("🔍 Calcular", type="primary"):
         phi_rad = math.radians(phi)
         lon_rad = math.radians(lon)
