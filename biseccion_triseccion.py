@@ -18,7 +18,7 @@ def biseccion_interface():
     st.header("Bisección Geodésica")
     st.markdown("---")
     
-    # — Entradas —
+   
     NA_str  = st.text_input("NA (Norte de A)")
     EA_str  = st.text_input("EA (Este de A)")
     NB_str  = st.text_input("NB (Norte de B)")
@@ -43,7 +43,7 @@ def biseccion_interface():
         bs = st.text_input("Segundos", key="bs")
     
     if st.button("🔍 Calcular P", type="primary"):
-        # — Validación y conversión —
+        
         campos = {
             "NA": NA_str, "EA": EA_str,
             "NB": NB_str, "EB": EB_str,
@@ -60,7 +60,7 @@ def biseccion_interface():
         alpha = gms_to_decimal(float(ag), float(am), float(as_))
         beta  = gms_to_decimal(float(bg), float(bm), float(bs))
         
-        # — Conversión a radianes —
+       
         alpha_rad = math.radians(alpha)
         beta_rad  = math.radians(beta)
         rho_rad   = math.pi - (alpha_rad + beta_rad)
@@ -69,7 +69,7 @@ def biseccion_interface():
             st.error("ρ ≈ 0°: α + β ≈ 180°, la bisección no es válida.")
             return
         
-        # — Cálculo —
+        
         dN   = NB - NA
         dE   = EB - EA
         AB   = math.hypot(dN, dE)
@@ -91,10 +91,8 @@ def biseccion_interface():
 
 
 def triseccion_interface():
-    st.header(" Trisección Geodésica")
+    st.header("Trisección Geodésica")
     st.markdown("---")
-
-    metodo = st.radio("Elige variante:", ["Método A", "Método B"])
 
     NA_str = st.text_input("NA (Norte de A)", key="t_NA")
     EA_str = st.text_input("EA (Este de A)", key="t_EA")
@@ -124,7 +122,6 @@ def triseccion_interface():
     if not st.button("🔍 Calcular P", type="primary"):
         return
 
-    # Validación de entradas
     for k, v in {
         "NA": NA_str, "EA": EA_str, "NB": NB_str, "EB": EB_str,
         "NC": NC_str, "EC": EC_str,
@@ -139,73 +136,34 @@ def triseccion_interface():
     NA, EA = float(NA_str), float(EA_str)
     NB, EB = float(NB_str), float(EB_str)
     NC, EC = float(NC_str), float(EC_str)
-    # Ángulos en grados decimales y radianes
+
     x = gms_to_decimal(float(g2), float(m2), float(s2))
     y = gms_to_decimal(float(g3), float(m3), float(s3))
     z = gms_to_decimal(float(g1), float(m1), float(s1))
+
     xr, yr, zr = map(math.radians, (x, y, z))
 
-    # Lados de ABC
-    AB = math.hypot(NB - NA, EB - EA)
-    BC = math.hypot(NC - NB, EC - EB)
-    CA = math.hypot(NC - NA, EC - EA)
+    a = math.atan((EC - EA)/(NC - NA)) - math.atan((EB - EA)/(NB - NA))
+    b = math.atan((EA - EB)/(NA - NB)) - math.atan((EC - EB)/(NC - NB))
+    c = math.atan((EB - EC)/(NB - NC)) - math.atan((EA - EC)/(NA - NC))
 
-    if metodo == "Método A":
-        # 1) Ángulo total en P entre A y C
-        p_hat = z + x
-        pr = math.radians(p_hat)
+    K1 = 1.0/(1/math.tan(a) - 1/math.tan(xr))
+    K2 = 1.0/(1/math.tan(b) - 1/math.tan(yr))
+    K3 = 1.0/(1/math.tan(c) - 1/math.tan(zr))
+    Ksum = K1 + K2 + K3
 
-        # 2) Ángulos interiores de △ABC usando ley de cosenos
-        A_hat = math.acos((AB**2 + CA**2 - BC**2) / (2 * AB * CA))
-        B_hat = math.acos((AB**2 + BC**2 - CA**2) / (2 * AB * BC))
-        C_hat = math.pi - (A_hat + B_hat)
+    NP = (K1*NA + K2*NB + K3*NC)/Ksum
+    EP = (K1*EA + K2*EB + K3*EC)/Ksum
 
-        # 3) Constante k = (senÂ · BC) / (senĈ · AB)
-        k = (math.sin(A_hat) * BC) / (math.sin(C_hat) * AB)
+    st.markdown("### Resultados intermedios")
+    st.write(f"a = {math.degrees(a):.6f}°")
+    st.write(f"b = {math.degrees(b):.6f}°")
+    st.write(f"c = {math.degrees(c):.6f}°")
+    st.write(f"K₁ = {K1:.6f}")
+    st.write(f"K₂ = {K2:.6f}")
+    st.write(f"K₃ = {K3:.6f}")
 
-        # 4) Calcular p̂₂ usando: p̂₂ = arctan [sen(p̂) / (k + cos(p̂))]
-        p2_hat = math.atan2(math.sin(pr), k + math.cos(pr))
-
-        # 5) Calcular p̂₁ = p̂ − p̂₂
-        p1_hat = pr - p2_hat
-
-        # 6) Longitud AP por Ley de Senos en △ABP:
-        # AP / sin(B̂) = AB / sin(p̂₁)  ->  AP = (sin(B̂) / sin(p̂₁)) * AB
-        AP = (math.sin(B_hat) / math.sin(p1_hat)) * AB
-
-        # 7) Azimut de A→B y dirección A→P
-        azAB = math.atan2(EB - EA, NB - NA)
-        azAP = azAB - A_hat
-
-        # 8) Desplazamientos en N y E
-        dNP = AP * math.cos(azAP)
-        dEP = AP * math.sin(azAP)
-
-        # 9) Coordenadas finales de P
-        NP = NA + dNP
-        EP = EA + dEP
-
-        # 10) Mostrar ángulos p̂₁ y p̂₂ en G·M·S
-        a1_g, a1_m, a1_s = rad_to_gms(p1_hat)
-        a2_g, a2_m, a2_s = rad_to_gms(p2_hat)
-        st.write(f"p̂₁ = {math.degrees(p1_hat):.6f}° = {a1_g}°{a1_m}′{a1_s:.2f}″")
-        st.write(f"p̂₂ = {math.degrees(p2_hat):.6f}° = {a2_g}°{a2_m}′{a2_s:.2f}″")
-        st.write(f"AP = **{AP:.6f}** m")
-
-    else:
-        # Tu código de Método B queda igual aquí (no lo reescribo)
-        a = math.atan((EC - EA)/(NC - NA)) - math.atan((EB - EA)/(NB - NA))
-        b = math.atan((EA - EB)/(NA - NB)) - math.atan((EC - EB)/(NC - NB))
-        c = math.atan((EB - EC)/(NB - NC)) - math.atan((EA - EC)/(NA - NC))
-        K1 = 1.0/(1/math.tan(a) - 1/math.tan(xr))
-        K2 = 1.0/(1/math.tan(b) - 1/math.tan(yr))
-        K3 = 1.0/(1/math.tan(c) - 1/math.tan(zr))
-        Ksum = K1 + K2 + K3
-        NP = (K1*NA + K2*NB + K3*NC)/Ksum
-        EP = (K1*EA + K2*EB + K3*EC)/Ksum
-
-    # Salida común
-    st.markdown("Coordenadas de P")
+    st.markdown("### Coordenadas de P")
     st.write(f"Nᴾ = **{NP:.6f}** m     Eᴾ = **{EP:.6f}** m")
 
    
