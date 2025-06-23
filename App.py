@@ -156,7 +156,6 @@ if opcion == "🏠 Inicio":
             <li>Visualiza los resultados</li>
             <li>Exporta los datos si es necesario</li>
         </ol>
-        <img src='https://miro.medium.com/v2/resize:fit:1400/1*_NVBTVdmjt3Qvq3CZOy-SQ.png' style='width:100%; border-radius:8px; margin-top:1rem;'>
     </div>
     """, unsafe_allow_html=True)
 
