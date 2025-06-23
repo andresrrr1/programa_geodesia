@@ -1,12 +1,12 @@
 import streamlit as st
 import math
 
-# Función para convertir GMS a decimal
+
 def gms_to_decimal(g, m, s, direccion):
     decimal = abs(g) + m / 60 + s / 3600
     return decimal if direccion == "N" else -decimal
 
-# Cálculo de radio de curvatura normal en dirección del azimut α
+
 def calcular_palpha(a, finv, lat_rad, azimut_rad):
     f = 1 / finv
     e2 = 2 * f - f ** 2
@@ -21,7 +21,7 @@ def calcular_palpha(a, finv, lat_rad, azimut_rad):
 
     return palpha, N, M, e2
 
-# Cálculo completo
+
 def calcular_nivelacion(Z1, S, H1, i, a, finv, latitud, azimut, metodo_k="fijo"):
     phi_rad = math.radians(latitud)
     alpha_rad = math.radians(azimut)
@@ -45,9 +45,9 @@ def calcular_nivelacion(Z1, S, H1, i, a, finv, latitud, azimut, metodo_k="fijo")
     H2 = H1 + deltaH + i
     return H2, deltaH, Z_corregido, rho, A, B1, C, k
 
-# Interfaz Streamlit
+
 def no_reciproca_interface():
-    st.header("Nivelación Trigonométrica No Recíproca")
+    st.title("Nivelación Trigonométrica No Recíproca")
 
     datum = st.selectbox("Selecciona el Datum", ["WGS84", "GRS80", "Internacional"])
     if datum == "WGS84":
