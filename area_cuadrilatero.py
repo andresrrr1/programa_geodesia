@@ -309,21 +309,21 @@ def area_cuadrilatero_interface():
                        f"{area:.6f} m² \n\n"
                        f"{area / 1e6:.6f} km²")
                 
-                # Mostrar gráfico 3D del elipsoide
+                
                 graficar_segmento(phi1_deg, phi2_deg, lambda1_deg, lambda2_deg, a, b)
 
             except Exception as e:
                 st.error(f"Error: {e}")
 
-    # Botón para mostrar el cuadrilátero en el mapa
+    
     if st.button("🔍 Mostrar Cuadrilátero en Mapa", type="primary"):
         if None in [phi1_deg, phi2_deg, lambda1_deg, lambda2_deg]:
             st.error("Por favor completa todas las coordenadas correctamente.")
         else:
             try:
-                # Generar el mapa
+                
                 mapa_html = graficar_cuadrilatero_en_mapa(phi1_deg, phi2_deg, lambda1_deg, lambda2_deg)
-                # Mostrar el mapa en Streamlit
+                
                 st.components.v1.html(mapa_html, height=500)
             except Exception as e:
                 st.error(f"Error: {e}")
