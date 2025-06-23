@@ -3,7 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 
-# Función para obtener parámetros del elipsoide
+
 def obtener_parametros_elipsoide(nombre_elipsoide):
     if nombre_elipsoide == 'WGS84':
         a = 6378137.0
@@ -14,7 +14,7 @@ def obtener_parametros_elipsoide(nombre_elipsoide):
     elif nombre_elipsoide == 'Internacional':
         a = 6378388.0
         f = 1 / 297.0
-    else: # Caso 'Manual' o cualquier otro
+    else: 
         a = 0.0
         f = 0.0
     return a, f
@@ -85,7 +85,7 @@ def lat_lon_a_cartesiano(lat_deg, lon_deg, a, b):
     lat_rad = np.radians(lat_deg)
     lon_rad = np.radians(lon_deg)
     
-    # Calcular el radio de curvatura en el primer vertical
+    
     e2 = 1 - (b**2 / a**2)
     N = a / np.sqrt(1 - e2 * np.sin(lat_rad)**2)
     
@@ -100,7 +100,7 @@ def crear_meridianos_paralelos(a, b, num_meridianos=24, num_paralelos=18):
     meridianos = []
     paralelos = []
     
-    # Crear meridianos (líneas de longitud constante)
+    
     longitudes = np.linspace(-180, 180, num_meridianos, endpoint=False)
     latitudes_meridiano = np.linspace(-90, 90, 100)
     
@@ -115,8 +115,8 @@ def crear_meridianos_paralelos(a, b, num_meridianos=24, num_paralelos=18):
             z_coords.append(z)
         meridianos.append((np.array(x_coords), np.array(y_coords), np.array(z_coords)))
     
-    # Crear paralelos (líneas de latitud constante)
-    latitudes = np.linspace(-75, 75, num_paralelos)  # Excluir polos extremos
+    
+    latitudes = np.linspace(-75, 75, num_paralelos)  
     longitudes_paralelo = np.linspace(-180, 180, 100)
     
     for lat in latitudes:
@@ -249,10 +249,10 @@ def crear_grafica_3d(a, b, puntos_principales=None, arco_coords=None, tipo_arco=
         hoverinfo='skip'
     ))
     
-    # Agregar meridiano de Greenwich completo (0° y 180°)
+    
     latitudes_greenwich = np.linspace(-90, 90, 100)
 
-# Meridiano 0°
+
     x_greenwich_0 = []
     y_greenwich_0 = []
     z_greenwich_0 = []
@@ -289,15 +289,15 @@ def crear_grafica_3d(a, b, puntos_principales=None, arco_coords=None, tipo_arco=
     ))
   
 
-# Agregar puntos principales si existen
+
     if puntos_principales:
         for i, (nombre, lat, lon) in enumerate(puntos_principales):
            x, y, z = lat_lon_a_cartesiano(lat, lon, a, b)
         
-        # Convertir coordenadas a GMS para mostrar en la gráfica
+        
            g_lat, m_lat, s_lat = decimales_a_gms(lat)
         
-        # Crear etiqueta en formato GMS
+        
            etiqueta_gms = f"P{i+1} ({g_lat:+.0f}°{m_lat:02.0f}'{s_lat:04.2f}\")"
         
            fig.add_trace(go.Scatter3d(
@@ -312,7 +312,7 @@ def crear_grafica_3d(a, b, puntos_principales=None, arco_coords=None, tipo_arco=
              hovertemplate=f"<b>{etiqueta_gms}</b><extra></extra>"
             ))
     
-    # Agregar arco si existe
+    
     if arco_coords:
         x_arco, y_arco, z_arco = arco_coords
         color_arco = 'gold' if tipo_arco == "meridiano" else 'magenta'
@@ -326,7 +326,7 @@ def crear_grafica_3d(a, b, puntos_principales=None, arco_coords=None, tipo_arco=
             hoverinfo='skip'
         ))
     
-    # Configurar el layout
+    
     fig.update_layout(
         title=dict(
             text=titulo,
@@ -414,7 +414,7 @@ def calcular_longitud_arco_interface():
         a_elipsoide, f_elipsoide = obtener_parametros_elipsoide(elipsoide_seleccionado)
         e2_elipsoide = 2 * f_elipsoide - f_elipsoide**2
 
-    # Calcular semieje menor
+    
     b_elipsoide = a_elipsoide * np.sqrt(1 - e2_elipsoide)
 
     st.markdown("---")
@@ -449,7 +449,7 @@ def calcular_longitud_arco_interface():
                 st.warning("Ingrese valores numéricos válidos para las latitudes decimales.")
                 return
 
-        else: # Formato GMS
+        else: 
             st.markdown("**Latitud inicial φ₁**")
             col1, col2, col3 = st.columns(3)
             g1_str = col1.text_input("Grados φ₁:", value="", key="g1_lam_mer")
@@ -486,7 +486,7 @@ def calcular_longitud_arco_interface():
         phi1_final_deg = signo_phi1 * phi1_deg_abs
         phi2_final_deg = signo_phi2 * phi2_deg_abs
 
-        # Usar longitud fija para el meridiano
+       
         lon_meridiano = 0.0
 
         st.markdown("---")
@@ -521,7 +521,7 @@ def calcular_longitud_arco_interface():
             ]
             
             arco_coords = crear_arco_meridiano(phi1_final_deg, phi2_final_deg, lon_meridiano, a_elipsoide, b_elipsoide)
-            # Mejorar visualización para latitudes muy cercanas
+            
             diferencia_lat = abs(phi2_final_deg - phi1_final_deg)
             if diferencia_lat < 2.0:  
               ancho_linea = 15
@@ -580,7 +580,7 @@ def calcular_longitud_arco_interface():
                 st.warning("Ingrese valores numéricos válidos para las latitudes/longitudes decimales.")
                 return
 
-        else: # Formato GMS
+        else: 
             st.markdown("**Latitud φ**")
             col1, col2, col3 = st.columns(3)
             g_par_str = col1.text_input("Grados φ:", value="", key="g_par")
@@ -657,7 +657,7 @@ def calcular_longitud_arco_interface():
                 f" **{longitud_calculada_par/1000:.8f} kilómetros**"
             )
 
-            # Crear visualización 3D
+           
             st.subheader("🌍 Visualización 3D")
             
             puntos_principales = [
